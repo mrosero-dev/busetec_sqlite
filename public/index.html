@@ -446,7 +446,7 @@ tbody td{padding:13px 14px;color:var(--negro)}
               const u = document.getElementById('lu').value.trim();
               const p = document.getElementById('lp').value.trim();
               let ok = true;
-              // HU-1 E3 equivalente: validar campos
+              // HU-1 C3 equivalente: validar campos
               document.getElementById('lf-u').classList.toggle('invalid', !u); if (!u) ok = false;
               document.getElementById('lf-p').classList.toggle('invalid', !p); if (!p) ok = false;
               if (!ok) return;
@@ -512,11 +512,22 @@ tbody td{padding:13px 14px;color:var(--negro)}
               try {
                   const rutas = await api('GET', '/rutas');
                   if (!rutas.length) {
-                      w.innerHTML = `<div class="es"><div class="ei"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/></svg></div><div class="et">Sin rutas registradas</div><div class="esub">Crea la primera ruta para comenzar</div><button class="btn bp" onclick="goTo('crear')">+ Crear Ruta</button></div>`;
+                      w.innerHTML = `<div class="es"><div class="ei">
+                      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                      <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                      </svg></div><div class="et">Sin rutas registradas</div>
+                      <div class="esub">Crea la primera ruta para comenzar</div>
+                      <button class="btn bp" onclick="goTo('crear')">+ Crear Ruta</button></div>`;
                       return;
                   }
                   const rec = rutas.slice(0, 5);
-                  w.innerHTML = `<div class="tw"><table><thead><tr><th>Código</th><th>Descripción</th><th>Paradas</th><th>T. Estimado</th><th>Estado</th></tr></thead><tbody>${rec.map(r => `<tr style="cursor:pointer" onclick="verRuta(${r.id})"><td><span style="font-family:var(--m);font-weight:600;color:var(--verde)">${r.codigo}</span></td><td>${r.descripcion.slice(0, 55)}${r.descripcion.length > 55 ? '…' : ''}</td><td>${r.total_paradas}</td><td>${r.tiempo_min} min</td><td>${badge(r.estado)}</td></tr>`).join('')}</tbody></table></div>`;
+                  w.innerHTML = `<div class="tw">
+                  <table><thead><tr><th>Código</th><th>Descripción</th>
+                  <th>Paradas</th><th>T. Estimado</th><th>Estado</th></tr></thead>
+                  <tbody>${rec.map(r => `<tr style="cursor:pointer" onclick="verRuta(${r.id})">
+                  <td><span style="font-family:var(--m);font-weight:600;color:var(--verde)">${r.codigo}</span></td>
+                  <td>${r.descripcion.slice(0, 55)}${r.descripcion.length > 55 ? '…' : ''}</td><td>${r.total_paradas}</td>
+                  <td>${r.tiempo_min} min</td><td>${badge(r.estado)}</td></tr>`).join('')}</tbody></table></div>`;
               } catch (e) { w.innerHTML = '<p style="padding:20px;color:var(--gt)">Error al cargar rutas</p>' }
           }
 
@@ -550,7 +561,9 @@ tbody td{padding:13px 14px;color:var(--negro)}
           // ── PARADAS ──
           function renderP(pfx, arr) {
               document.getElementById(`${pfx}-pl`).innerHTML = arr.length
-                  ? arr.map((p, i) => `<li class="pi"><span class="pn">${i + 1}</span><span>${p}</span><button class="pd" onclick="remP('${pfx}',${i})">×</button></li>`).join('')
+                  ? arr.map((p, i) => `<li class="pi">
+                  <span class="pn">${i + 1}</span>
+                  span>${p}</span><button class="pd" onclick="remP('${pfx}',${i})">×</button></li>`).join('')
                   : '';
           }
           function addP(pfx) {
@@ -580,7 +593,7 @@ tbody td{padding:13px 14px;color:var(--negro)}
               const t = parseInt(document.getElementById('cr-t').value);
               const est = document.getElementById('cr-est').value;
 
-              // HU-1 E3: validar campos obligatorios
+              // HU-1 C3: validar campos obligatorios
               let ok = true;
               document.getElementById('f-cod').classList.toggle('invalid', !cod); if (!cod) ok = false;
               document.getElementById('f-desc').classList.toggle('invalid', !desc); if (!desc) ok = false;
@@ -589,12 +602,12 @@ tbody td{padding:13px 14px;color:var(--negro)}
 
               const btn = document.getElementById('cr-save'); btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
               try {
-                  // HU-1 E1: crear ruta — E2 duplicado lo maneja el servidor
+                  // HU-1 C1: crear ruta — C2 duplicado lo maneja el servidor
                   const d = await api('POST', '/rutas', { codigo: cod, descripcion: desc, tiempo_min: t, estado: est, paradas: crP });
                   toast(d.message || 'Ruta creada exitosamente ✓');
                   goTo('lista'); cargarRutas(); cargarStats();
               } catch (e) {
-                  // HU-1 E2: ruta ya existente
+                  // HU-1 C2: ruta ya existente
                   toast(e.message, 'er');
               }
               btn.disabled = false; btn.textContent = 'Crear Ruta';
@@ -614,7 +627,7 @@ tbody td{padding:13px 14px;color:var(--negro)}
                   renderP('ed', edP);
                   goTo('editar');
               } catch (e) {
-                  // HU-2 E4: ruta no encontrada
+                  // HU-2 C4: ruta no encontrada
                   toast('Ruta no encontrada en el sistema', 'er');
               }
           }
@@ -626,7 +639,7 @@ tbody td{padding:13px 14px;color:var(--negro)}
               const t = parseInt(document.getElementById('ed-t').value);
               const est = document.getElementById('ed-est').value;
 
-              // HU-2 E2: validar datos antes de guardar
+              // HU-2 C2: validar datos antes de guardar
               let ok = true;
               document.getElementById('f-ed-desc').classList.toggle('invalid', !desc); if (!desc) ok = false;
               document.getElementById('f-ed-tiempo').classList.toggle('invalid', !t || t < 1); if (!t || t < 1) ok = false;
@@ -634,7 +647,7 @@ tbody td{padding:13px 14px;color:var(--negro)}
 
               const btn = document.getElementById('ed-save'); btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
               try {
-                  // HU-2 E1 y E3: actualizar datos y tiempos
+                  // HU-2 C1 y C3: actualizar datos y tiempos
                   const d = await api('PUT', `/rutas/${editId}`, { descripcion: desc, tiempo_min: t, estado: est, paradas: edP });
                   toast(d.message || 'Ruta actualizada correctamente ✓');
                   goTo('lista'); cargarRutas(); cargarStats();
@@ -657,7 +670,7 @@ tbody td{padding:13px 14px;color:var(--negro)}
             <dl class="df"><dt>Creado</dt><dd>${new Date(r.creado_en).toLocaleDateString('es-CO')}</dd></dl>
           `;
 
-                  // HU-3 E3: mostrar tiempos estimados por parada
+                  // HU-3 C3: mostrar tiempos estimados por parada
                   if (r.paradas.length) {
                       const tiempoPorParada = r.paradas.length > 1 ? Math.round(r.tiempo_min / (r.paradas.length - 1)) : r.tiempo_min;
                       document.getElementById('vr-paradas-wrap').innerHTML = `
@@ -674,7 +687,7 @@ tbody td{padding:13px 14px;color:var(--negro)}
 
                   goTo('ver');
               } catch (e) {
-                  // HU-3 E4: ruta no encontrada
+                  // HU-3 C4: ruta no encontrada
                   toast('Ruta no encontrada en el sistema', 'er');
               }
           }

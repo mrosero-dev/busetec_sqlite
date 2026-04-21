@@ -71,7 +71,7 @@ app.post('/api/rutas', async (req, res) => {
   try {
     const { codigo, descripcion, tiempo_min, estado = 'activo', paradas = [] } = req.body;
 
-    // HU-1 E3: validar campos obligatorios
+    // HU-1 C3: validar campos obligatorios
     if (!codigo)       return res.status(400).json({ error: 'El código de la ruta es obligatorio.' });
     if (!descripcion)  return res.status(400).json({ error: 'La descripción es obligatoria.' });
     if (!tiempo_min || Number(tiempo_min) < 1)
@@ -80,17 +80,17 @@ app.post('/api/rutas', async (req, res) => {
     const db = await getDb();
     const codigoUpper = codigo.trim().toUpperCase();
 
-    // HU-1 E2: verificar duplicado exacto
+    // HU-1 C2: verificar duplicado exacto
     const existe = query(db, 'SELECT id FROM rutas WHERE codigo = ?', [codigoUpper]);
     if (existe.length)
       return res.status(409).json({ error: `Ya existe una ruta con el código ${codigoUpper}. Usa un identificador diferente.` });
 
-    // HU-1 E2: verificar ruta similar (primeros 40 caracteres de descripción)
+    // HU-1 C2: verificar ruta similar (primeros 40 caracteres de descripción)
     const descNorm = descripcion.trim().toLowerCase().slice(0, 40);
     const todas = query(db, 'SELECT codigo, descripcion FROM rutas', []);
     const similar = todas.find(r => r.descripcion.toLowerCase().slice(0, 40) === descNorm);
     if (similar)
-      return res.status(409).json({ error: `Existe una ruta muy similar (${similar.codigo}). Verifica que no sea duplicado o cambia el identificador.` });
+      return res.status(409).json({ error: `Existe una ruta similar (${similar.codigo}). Verifica que no sea duplicado o cambia el identificador.` });
 
     // Insertar ruta
     run(db, `INSERT INTO rutas (codigo, descripcion, tiempo_min, estado) VALUES (?, ?, ?, ?)`,
@@ -99,7 +99,7 @@ app.post('/api/rutas', async (req, res) => {
     const nuevaRuta = query(db, 'SELECT * FROM rutas WHERE codigo = ?', [codigoUpper])[0];
 
     // Insertar paradas
-    paradas.forEach((nombre, i) => {
+    paradas.foreach((nombre, i) => {
       run(db, 'INSERT INTO paradas (ruta_id, nombre, orden) VALUES (?, ?, ?)',
         [nuevaRuta.id, nombre.trim(), i + 1]);
     });
@@ -121,7 +121,7 @@ app.put('/api/rutas/:id', async (req, res) => {
     const { descripcion, tiempo_min, estado, paradas = [] } = req.body;
     const id = parseInt(req.params.id);
 
-    // HU-2 E2: validar antes de guardar
+    // HU-2 C2: validar antes de guardar
     if (!descripcion)
       return res.status(400).json({ error: 'La descripción es obligatoria. No se pueden guardar los cambios.' });
     if (!tiempo_min || Number(tiempo_min) < 1)
@@ -130,11 +130,11 @@ app.put('/api/rutas/:id', async (req, res) => {
     const db = await getDb();
     const existente = query(db, 'SELECT * FROM rutas WHERE id = ?', [id]);
 
-    // HU-2 E4: ruta no encontrada
+    // HU-2 C4: ruta no encontrada
     if (!existente.length)
       return res.status(404).json({ error: 'La ruta no fue encontrada en el sistema.' });
 
-    // HU-2 E1/E3: actualizar datos y tiempos
+    // HU-2 C1/C3: actualizar datos y tiempos
     run(db, `UPDATE rutas SET descripcion = ?, tiempo_min = ?, estado = ?, modificado = DATE('now') WHERE id = ?`,
       [descripcion.trim(), Number(tiempo_min), estado || existente[0].estado, id]);
 
