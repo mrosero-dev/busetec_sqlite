@@ -1216,8 +1216,9 @@
                             <!-- HU-A1 E3 y E4: campos obligatorios con validación de formato -->
                             <div class="f" id="f-bus-placa">
                                 <label>Placa *</label>
-                                <input type="text" id="bus-placa" placeholder="ej. ABC-123" />
-                                <div class="err-msg" id="err-bus-placa">La placa es obligatoria</div>
+                                <input type="text" id="bus-placa" placeholder="ej. ABC-123" maxlength="7"
+                                       oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')" />
+                                <div class="err-msg" id="err-bus-placa">Formato inválido — se esperaba: ABC-123 (3 letras, guion, 3 números)</div>
                             </div>
                             <div class="f" id="f-bus-codigo">
                                 <label>Código Interno *</label>
