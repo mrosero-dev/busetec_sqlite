@@ -184,6 +184,11 @@ app.post('/api/autobuses', async (req, res) => {
         const placaUp = placa.trim().toUpperCase();
         const codigoUp = codigo.trim().toUpperCase();
 
+        // E4: validar formato de placa ABC-123
+        const regexPlaca = /^[A-Z]{3}-[0-9]{3}$/;
+        if (!regexPlaca.test(placaUp))
+            return res.status(400).json({ error: 'Formato de placa inválido — se esperaba: ABC-123 (3 letras, guion, 3 números).', campo: 'placa' });
+
         const db = await getDb();
 
         // E2: placa ya registrada
@@ -224,16 +229,23 @@ app.put('/api/autobuses/:id', async (req, res) => {
         if (!existente.length)
             return res.status(404).json({ error: 'Autobus no encontrado en el sistema.' });
 
-        const estadoFinal = estado || existente[0].estado;
+        const estadoAnterior = existente[0].estado;   //para el criterio aqui se guarda el estado anterior 
+        const estadoFinal = estado || estadoAnterior;
         const estadosValidos = ['activo', 'inactivo', 'en_mantenimiento'];
+
         if (!estadosValidos.includes(estadoFinal))
             return res.status(400).json({ error: 'Estado operativo no válido.', campo: 'estado' });
+
+        const estadoCambio = estadoFinal !== estadoAnterior; //aqui se verifica si cambio 
 
         run(db, `UPDATE autobuses SET marca = ?, modelo = ?, anio = ?, capacidad = ?, estado = ?, modificado = DATE('now') WHERE id = ?`,
             [marca.trim(), modelo.trim(), Number(anio), Number(capacidad), estadoFinal, id]);
 
         const actualizado = query(db, 'SELECT * FROM autobuses WHERE id = ?', [id])[0];
-        res.json({ ...actualizado, message: `✓ Autobus ${actualizado.placa} actualizado correctamente.` });
+        res.json({ ...actualizado, message: `✓ Autobus ${actualizado.placa} actualizado correctamente.`, estadoCambio }); //nuevo campo en la respuesta 
+
+
+
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

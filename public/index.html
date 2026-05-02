@@ -208,6 +208,12 @@
                 border-color: var(--rojo) !important
             }
 
+            .f.invalid input, .f.invalid select, .f.invalid textarea,
+            input.invalid, select.invalid {
+                border-color: var(--rojo) !important;
+                box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
+            }
+
             .f.invalid .err-msg {
                 display: block
             }
@@ -1060,13 +1066,7 @@
                             <p><strong>ID:</strong> <span id="idUsuario"></span></p>
                         </div>
                     </div>
-                    <div class="sr">
-                        <div class="sc"><div class="sl">Total Rutas</div><div class="sv" id="s-total">—</div><div class="ss">registradas</div></div>
-                        <div class="sc"><div class="sl">Rutas Activas</div><div class="sv" id="s-activas">—</div><div class="ss">en operación</div></div>
-                        <div class="sc"><div class="sl">Total Buses</div><div class="sv" id="s-buses">—</div><div class="ss">en flota</div></div>
-                        <div class="sc"><div class="sl">Buses Activos</div><div class="sv" id="s-buses-act">—</div><div class="ss">disponibles</div></div>
-                        <div class="sc"><div class="sl">En Mantto.</div><div class="sv" id="s-buses-mnt">—</div><div class="ss">en mantenimiento</div></div>
-                    </div>
+            
                     <div class="card">
                         <h2 style="margin-bottom:6px">Bienvenido al sistema</h2>
                         <p style="color:var(--gt);font-size:14px">Selecciona una opción en el menú lateral para gestionar la flota y las rutas.</p>
@@ -1217,12 +1217,13 @@
                             <div class="f" id="f-bus-placa">
                                 <label>Placa *</label>
                                 <input type="text" id="bus-placa" placeholder="ej. ABC-123" maxlength="7"
-                                       oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'')" />
+                                       oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'').replace(/(-.*)-/g,'$1')" />
                                 <div class="err-msg" id="err-bus-placa">Formato inválido — se esperaba: ABC-123 (3 letras, guion, 3 números)</div>
                             </div>
                             <div class="f" id="f-bus-codigo">
                                 <label>Código Interno *</label>
-                                <input type="text" id="bus-codigo" placeholder="ej. BUS-004" />
+                                <input type="text" id="bus-codigo" placeholder="ej. BUS-004" maxlength="10"
+                                       oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9-]/g,'').replace(/(-.*)-/g,'$1')" />
                                 <div class="err-msg" id="err-bus-codigo">El código interno es obligatorio</div>
                             </div>
                             <div class="f" id="f-bus-marca">
@@ -1501,7 +1502,7 @@
             if (pg === 'buses') cargarBuses();
             if (pg === 'bus-crear') resetBusForm();
             if (pg === 'conductores') cargarConductores();
-            if (pg === 'cond-crear') resetCondForm();
+            if (pg === 'cond-crear') { resetCondForm(); initConductorInputGuards(); }
             if (pg === 'home') cargarStats();
         }
 
@@ -1672,7 +1673,9 @@
 
         // HU-A3: cargar y filtrar flota
         async function cargarBuses() {
-            const q = document.getElementById('bus-srch')?.value || '';
+
+            const campoBusqueda = document.getElementById('bus-srch');  // ← línea 1 nueva
+            const q = campoBusqueda?.value || '';
             const estado = document.getElementById('bus-estado-filtro')?.value || '';
             const tbody = document.getElementById('tb-buses');
             const em = document.getElementById('em-buses');
@@ -1680,7 +1683,15 @@
                 let url = `/autobuses?q=${encodeURIComponent(q)}`;
                 if (estado) url += `&estado=${encodeURIComponent(estado)}`;
                 const buses = await api('GET', url);
-                if (!buses.length) { tbody.innerHTML = ''; em.style.display = ''; return; }
+                if (!buses.length)
+                {
+                    tbody.innerHTML = ''; 
+                    em.style.display = '';
+
+                    if (q) campoBusqueda.classList.add('invalid');       // ← línea nueva
+                    return;
+                }
+                campoBusqueda.classList.remove('invalid');               // ← línea nueva
                 em.style.display = 'none';
                 tbody.innerHTML = buses.map(b => `<tr>
             <td><span style="font-family:var(--m);font-weight:600;color:var(--verde)">${b.placa}</span></td>
@@ -1704,6 +1715,7 @@
             ['f-bus-placa', 'f-bus-codigo', 'f-bus-marca', 'f-bus-modelo', 'f-bus-anio', 'f-bus-cap'].forEach(id => document.getElementById(id).classList.remove('invalid'));
         }
 
+
         // HU-A1: registrar autobus
         async function registrarBus() {
             const placa = document.getElementById('bus-placa').value.trim().toUpperCase();
@@ -1715,28 +1727,47 @@
             const estado = document.getElementById('bus-estado').value;
             const anioActual = new Date().getFullYear();
 
-            // E3: validar campos obligatorios | E4: formato
             let ok = true;
-            const setInv = (fId, cond) => { document.getElementById(fId).classList.toggle('invalid', cond); if (cond) ok = false; };
-            setInv('f-bus-placa', !placa);
-            setInv('f-bus-codigo', !codigo);
-            setInv('f-bus-marca', !marca);
-            setInv('f-bus-modelo', !modelo);
+
+            const setInv = (fId, cond, msg) => {
+                document.getElementById(fId).classList.toggle('invalid', cond);
+                const errEl = document.getElementById('err-' + fId.replace('f-', ''));
+                if (errEl && msg !== undefined) errEl.textContent = cond ? msg : '';
+                if (cond) ok = false;
+            };
+
+            // E4: formato placa ABC-123
+            const regexPlaca = /^[A-Z]{3}-[0-9]{3}$/;
+            setInv('f-bus-placa',
+                !placa || !regexPlaca.test(placa),
+                !placa ? 'La placa es obligatoria' : 'Formato inválido — se esperaba: ABC-123'
+            );
+
+            // E4: formato código BUS-004
+            const regexCodigo = /^[A-Z]{2,5}-[0-9]{2,5}$/;
+            setInv('f-bus-codigo',
+                !codigo || !regexCodigo.test(codigo),
+                !codigo ? 'El código interno es obligatorio' : 'Formato inválido — se esperaba: BUS-004'
+            );
+
+            setInv('f-bus-marca', !marca, 'La marca es obligatoria');
+            setInv('f-bus-modelo', !modelo, 'El modelo es obligatorio');
+
             const anioInv = !anio || anio < 1990 || anio > anioActual + 1;
             document.getElementById('err-bus-anio').textContent = anioInv ? `El año debe estar entre 1990 y ${anioActual + 1}` : '';
             setInv('f-bus-anio', anioInv);
-            setInv('f-bus-cap', !cap || cap < 1);
-            if (!ok) { toast('Completa todos los campos obligatorios correctamente', 'er'); return; }
+
+            setInv('f-bus-cap', !cap || cap < 1, 'La capacidad debe ser mayor a 0');
+
+            if (!ok) { toast('Fallo al registrar, casillas obligatorias faltantes', 'er'); return; }
 
             const btn = document.getElementById('bus-save'); btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
             try {
                 const d = await api('POST', '/autobuses', { placa, codigo, marca, modelo, anio, capacidad: cap, estado });
                 toast(d.message || 'Autobus registrado correctamente ✓');
-                // E2: si placa duplicada, el server retorna error y se resalta campo
                 goTo('buses'); cargarStats();
             } catch (e) {
                 toast(e.message, 'er');
-                // resaltar campo específico si viene del servidor
                 if (e.campo) {
                     const mapa = { placa: 'f-bus-placa', codigo: 'f-bus-codigo' };
                     if (mapa[e.campo]) document.getElementById(mapa[e.campo]).classList.add('invalid');
@@ -1744,6 +1775,10 @@
             }
             btn.disabled = false; btn.textContent = 'Registrar Autobus';
         }
+
+
+
+
 
         // HU-A2: editar autobus
         async function editarBus(id) {
@@ -1785,13 +1820,17 @@
             document.getElementById('err-be-anio').textContent = anioInv ? `Año inválido (1990–${anioActual + 1})` : '';
             setInv('f-be-anio', anioInv);
             setInv('f-be-cap', !cap || cap < 1);
-            if (!ok) { toast('Corrige los campos marcados antes de guardar', 'er'); return; }
+            if (!ok) { toast('Fallo al modificar, casillas obligatorias vacias', 'er'); return; }
 
             const btn = document.getElementById('be-save'); btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
             try {
+                console.log('estado enviado:', estado);  // ← agregar esto
                 const d = await api('PUT', `/autobuses/${busEditId}`, { marca, modelo, anio, capacidad: cap, estado });
+                console.log('respuesta backend:', d);    // ← y esto
+                //const mensajeFinal = d.estadoCambio
                 toast(d.message || 'Autobus actualizado correctamente ✓');
-                goTo('buses'); cargarStats();
+                if (d.estadoCambio) toast('Estado del autobus actualizado.');   // m14s
+                setTimeout(() => { goTo('buses'); cargarStats(); }, 300);  // pequeño delay
             } catch (e) { toast(e.message, 'er'); }
             btn.disabled = false; btn.textContent = 'Guardar Cambios';
         }
@@ -1810,7 +1849,19 @@
             <dl class="df"><dt>Capacidad</dt><dd>${b.capacidad} pasajeros</dd></dl>
             <dl class="df"><dt>Registrado</dt><dd>${b.creado_en}</dd></dl>`;
                 goTo('bus-ver');
-            } catch (e) { toast('Autobus no encontrado en el sistema', 'er'); }
+            } catch (e) {
+
+                toast('Autobus no encontrado en el sistema', 'er'); 
+
+                const campoBusqueda = document.getElementById('bus-srch');
+                   if (campoBusqueda) {
+                        campoBusqueda.classList.add('invalid');
+                        campoBusqueda.focus();
+                        campoBusqueda.addEventListener('input', () => {
+                            campoBusqueda.classList.remove('invalid');  // se limpia al escribir
+                        }, { once: true });
+                    }    
+            }
         }
 
         async function eliminarBus(id, placa) {
@@ -1852,6 +1903,34 @@
             document.getElementById('err-c-username').textContent = 'El nombre de usuario es obligatorio';
         }
 
+
+        // ── Sanitización de inputs (HU-D1) ────────────────────────
+        function initConductorInputGuards() {
+            // Cédula: solo dígitos
+            document.getElementById('c-cedula').addEventListener('input', function () {
+                const cur = this.value;
+                const clean = cur.replace(/[^0-9]/g, '');
+                if (cur !== clean) this.value = clean;
+            });
+
+            // Nombre: letras, tildes, ñ, espacios — sin símbolos
+            document.getElementById('c-nombre').addEventListener('input', function () {
+                const cur = this.value;
+                const clean = cur.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, '');
+                if (cur !== clean) this.value = clean;
+            });
+
+            // Username: letras, números, guión bajo
+            document.getElementById('c-username').addEventListener('input', function () {
+                const cur = this.value;
+                const clean = cur.replace(/[^a-zA-Z0-9_]/g, '');
+                if (cur !== clean) this.value = clean;
+            });
+        }
+
+
+
+
         async function asignarRolConductor() {
             const nombre = document.getElementById('c-nombre').value.trim();
             const cedula = document.getElementById('c-cedula').value.trim();
@@ -1859,25 +1938,64 @@
             const password = document.getElementById('c-password').value;
             const rol = document.getElementById('c-rol').value;
 
-            let ok = true;
-            const setInv = (fId, cond) => { document.getElementById(fId).classList.toggle('invalid', cond); if (cond) ok = false; };
+            const setInv = (fId, cond) => {
+                document.getElementById(fId).classList.toggle('invalid', cond);
+            };
+
+            // ── Pasada 1: campos de texto obligatorios (PA16 → m20) ──
+            const camposFaltantes =
+                !nombre || !cedula || !username || !password;
+
             setInv('f-c-nombre', !nombre);
             setInv('f-c-cedula', !cedula);
-            // E4: rol obligatorio
-            setInv('f-c-rol', !rol);
-            // E2: username obligatorio (duplicado lo detecta el servidor)
             setInv('f-c-username', !username);
             setInv('f-c-password', !password);
-            if (!ok) { toast('Completa todos los campos obligatorios, incluyendo el rol', 'er'); return; }
+            // limpiar rol para no confundir en esta pasada
+            setInv('f-c-rol', false);
 
-            const btn = document.getElementById('c-save'); btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
+            if (camposFaltantes) {
+                toast('Fallo al registrar, casillas obligatorias faltantes', 'er'); // m20
+                return;
+            }
+
+            // ── Pasada 1b: formato de campos ──
+            const soloNumeros = /^[0-9]+$/;
+            const soloNombre = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$/;
+            const soloUsername = /^[a-zA-Z0-9_]+$/;
+
+            const cedulaInvalida = !soloNumeros.test(cedula);
+            const nombreInvalido = !soloNombre.test(nombre);
+            const usernameInvalido = !soloUsername.test(username);
+
+            setInv('f-c-cedula', cedulaInvalida);
+            setInv('f-c-nombre', nombreInvalido);
+            setInv('f-c-username', usernameInvalido);
+
+            if (cedulaInvalida || nombreInvalido || usernameInvalido) {
+                toast('Error en el registro: verifique el formato de los campos marcados', 'er');
+                return;
+            }
+
+
+            // ── Pasada 2: rol no seleccionado (PA17 → m21) ──
+
+            if (!rol) {
+                setInv('f-c-rol', true);
+                toast('Debe seleccionar un rol para el conductor', 'er'); // m21
+                return;
+            }
+            setInv('f-c-rol', false);
+
+            const btn = document.getElementById('c-save');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="ld"></span>';
+
             try {
                 const d = await api('POST', '/conductores', { nombre, cedula, username, password, rol });
                 toast(d.message || 'Rol asignado correctamente ✓');
                 goTo('conductores');
             } catch (e) {
                 toast(e.message, 'er');
-                // E2: resaltar username si ya está en uso
                 if (e.campo === 'username') {
                     document.getElementById('f-c-username').classList.add('invalid');
                     document.getElementById('err-c-username').textContent = e.message;
@@ -1886,8 +2004,10 @@
                     document.getElementById('f-c-cedula').classList.add('invalid');
                 }
             }
-            btn.disabled = false; btn.textContent = 'Asignar Rol';
+            btn.disabled = false;
+            btn.textContent = 'Asignar Rol';
         }
+
 
         async function eliminarConductor(id, nombre) {
             confirm_('Eliminar Conductor', `¿Deseas eliminar al conductor ${nombre} del sistema?`, async () => {
