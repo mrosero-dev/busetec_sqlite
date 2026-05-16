@@ -1079,7 +1079,7 @@
                             <p><strong>ID:</strong> <span id="idUsuario"></span></p>
                         </div>
                     </div>
-            
+
                     <div class="card">
                         <h2 style="margin-bottom:6px">Bienvenido al sistema</h2>
                         <p style="color:var(--gt);font-size:14px">Selecciona una opción en el menú lateral para gestionar la flota y las rutas.</p>
@@ -1119,7 +1119,7 @@
                         <div class="ch">
                             <div class="ct">
                                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
-                                Crear Nueva Ruta 
+                                Crear Nueva Ruta
                             </div>
                         </div>
                         <div class="fg">
@@ -1142,7 +1142,7 @@
                         <div class="ch">
                             <div class="ct">
                                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                                Modificar Ruta 
+                                Modificar Ruta
                             </div>
                         </div>
                         <div class="fg">
@@ -1330,12 +1330,22 @@
                 <!-- ── CONDUCTORES: LISTADO ── -->
                 <div class="pv" id="page-conductores">
                     <div class="card">
+                        <!-- REEMPLAZA el .ch y agrega .sb2 ANTES de .tw en page-conductores -->
                         <div class="ch">
                             <div class="ct">
-                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                </svg>
                                 Conductores
                             </div>
                             <button class="btn bp bsm" onclick="goTo('cond-crear')">+ Asignar Rol</button>
+                        </div>
+                        <!-- NUEVO: barra de búsqueda -->
+                        <div class="sb2">
+                            <input type="text" id="cond-srch"
+                                   placeholder="Buscar por nombre o cédula..."
+                                   oninput="cargarConductores()" />
                         </div>
                         <div class="tw">
                             <table>
@@ -1402,6 +1412,60 @@
                         </div>
                     </div>
                 </div>
+
+
+
+                <!-- ──E2/E8: Modificar + cancelar con confirmación MODIFICAR CONDUCTOR ── -->
+                <div class="pv" id="page-cond-editar">
+                    <div class="card">
+                        <div class="ch">
+                            <div class="ct">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                                Modificar Conductor
+                            </div>
+                        </div>
+                        <div class="fg">
+                            <div class="f full" id="f-ce-nombre">
+                                <label>Nombre Completo *</label>
+                                <input type="text" id="ce-nombre" />
+                                <div class="err-msg">El nombre es obligatorio</div>
+                            </div>
+                            <div class="f" id="f-ce-cedula">
+                                <label>Cédula</label>
+                                <!-- readonly: la cédula no se cambia para evitar duplicados -->
+                                <input type="text" id="ce-cedula" readonly />
+                            </div>
+                            <div class="f" id="f-ce-rol">
+                                <label>Rol *</label>
+                                <select id="ce-rol">
+                                    <option value="conductor">Conductor</option>
+                                    <option value="conductor_senior">Conductor Senior</option>
+                                    <option value="auxiliar">Auxiliar</option>
+                                </select>
+                                <div class="err-msg">Debe seleccionar un rol</div>
+                            </div>
+                            <div class="f" id="f-ce-username">
+                                <label>Nombre de usuario</label>
+                                <input type="text" id="ce-username" readonly />
+                            </div>
+                            <div class="f" id="f-ce-password">
+                                <label>Nueva contraseña <span style="font-weight:400;color:var(--gt)">(dejar vacío para no cambiar)</span></label>
+                                <input type="password" id="ce-password" placeholder="Nueva contraseña..." />
+                                <div class="err-msg">Error en la contraseña</div>
+                            </div>
+                        </div>
+                        <!-- E8: cancelar con confirmación -->
+                        <div class="fa">
+                            <button class="btn bs" onclick="cancelarEdicionConductor()">Cancelar</button>
+                            <button class="btn bp" id="ce-save" onclick="actualizarConductor()">Guardar Cambios</button>
+                        </div>
+                    </div>
+                </div>
+
+
 
             </div><!-- .co -->
         </main>
@@ -1499,6 +1563,8 @@
 
         // ── NAV ──
         const TITLES = {
+            //TITLES, se agrego esta línea:
+            'cond-editar': 'Modificar Conductor',
             home: 'Inicio', lista: 'Consultar Rutas', crear: 'Crear Ruta',
             editar: 'Modificar Ruta', ver: 'Detalle de Ruta',
             buses: 'Consultar Flota', 'bus-crear': 'Registrar Autobus',
@@ -1518,6 +1584,7 @@
             if (pg === 'bus-crear') resetBusForm();
             if (pg === 'conductores') cargarConductores();
             if (pg === 'cond-crear') { resetCondForm(); initConductorInputGuards(); }
+            if (pg === 'cond-editar') initConductorEditGuards();
             if (pg === 'home') cargarStats();
         }
 
@@ -1578,17 +1645,17 @@
                 if (!rutas.length) { tbody.innerHTML = ''; em.style.display = ''; return; }
                 em.style.display = 'none';
                 tbody.innerHTML = rutas.map(r => `<tr>
-            <td><span style="font-family:var(--m);font-weight:600;color:var(--verde)">${r.codigo}</span></td>
-            <td>${r.descripcion.slice(0, 60)}${r.descripcion.length > 60 ? '…' : ''}</td>
-            <td>${r.total_paradas}</td>
-            <td>${r.tiempo_min} min</td>
-            <td>${badge(r.estado)}</td>
-            <td><div style="display:flex;gap:6px">
-                <button class="btn bsm bs" onclick="verRuta(${r.id})">Ver</button>
-                ${USER.rol !== 'gestor_operativo' ? `<button class="btn bsm bp" onclick="editarRuta(${r.id})">Modificar</button>` : ''}
-                ${USER.rol !== 'gestor_operativo' ? `<button class="btn bsm bd" onclick="eliminarRuta(${r.id},'${r.codigo}')">Eliminar</button>` : ''}
-            </div></td>
-          </tr>`).join('');
+                <td><span style="font-family:var(--m);font-weight:600;color:var(--verde)">${r.codigo}</span></td>
+                <td>${r.descripcion.slice(0, 60)}${r.descripcion.length > 60 ? '…' : ''}</td>
+                <td>${r.total_paradas}</td>
+                <td>${r.tiempo_min} min</td>
+                <td>${badge(r.estado)}</td>
+                <td><div style="display:flex;gap:6px">
+                    <button class="btn bsm bs" onclick="verRuta(${r.id})">Ver</button>
+                    ${USER.rol !== 'gestor_operativo' ? `<button class="btn bsm bp" onclick="editarRuta(${r.id})">Modificar</button>` : ''}
+                    ${USER.rol !== 'gestor_operativo' ? `<button class="btn bsm bd" onclick="eliminarRuta(${r.id},'${r.codigo}')">Eliminar</button>` : ''}
+                </div></td>
+              </tr>`).join('');
             } catch (e) { toast('Error cargando rutas', 'er'); }
         }
 
@@ -1679,17 +1746,17 @@
                 const r = await api('GET', `/rutas/${id}`);
                 editId = id;
                 document.getElementById('vr-det').innerHTML = `
-            <dl class="df"><dt>Código</dt><dd style="font-family:var(--m);color:var(--verde);font-size:18px;font-weight:700">${r.codigo}</dd></dl>
-            <dl class="df"><dt>Estado</dt><dd>${badge(r.estado)}</dd></dl>
-            <dl class="df" style="grid-column:1/-1"><dt>Descripción</dt><dd style="font-weight:400;color:var(--gt);line-height:1.6">${r.descripcion}</dd></dl>
-            <dl class="df"><dt>Tiempo Estimado</dt><dd>${r.tiempo_min} minutos</dd></dl>
-            <dl class="df"><dt>Total Paradas</dt><dd>${r.paradas.length}</dd></dl>
-            <dl class="df"><dt>Creado</dt><dd>${r.creado_en}</dd></dl>`;
+                <dl class="df"><dt>Código</dt><dd style="font-family:var(--m);color:var(--verde);font-size:18px;font-weight:700">${r.codigo}</dd></dl>
+                <dl class="df"><dt>Estado</dt><dd>${badge(r.estado)}</dd></dl>
+                <dl class="df" style="grid-column:1/-1"><dt>Descripción</dt><dd style="font-weight:400;color:var(--gt);line-height:1.6">${r.descripcion}</dd></dl>
+                <dl class="df"><dt>Tiempo Estimado</dt><dd>${r.tiempo_min} minutos</dd></dl>
+                <dl class="df"><dt>Total Paradas</dt><dd>${r.paradas.length}</dd></dl>
+                <dl class="df"><dt>Creado</dt><dd>${r.creado_en}</dd></dl>`;
                 if (r.paradas.length) {
                     const tpp = r.paradas.length > 1 ? Math.round(r.tiempo_min / (r.paradas.length - 1)) : r.tiempo_min;
                     document.getElementById('vr-paradas-wrap').innerHTML = `<ul class="pl">${r.paradas.map((p, i) => `
-              <li class="pi"><span class="pn">${i + 1}</span><span style="flex:1">${p.nombre}</span>
-              <span style="font-size:12px;color:var(--gt);font-family:var(--m)">~${i === 0 ? 0 : tpp * i} min</span></li>`).join('')}</ul>`;
+                  <li class="pi"><span class="pn">${i + 1}</span><span style="flex:1">${p.nombre}</span>
+                  <span style="font-size:12px;color:var(--gt);font-family:var(--m)">~${i === 0 ? 0 : tpp * i} min</span></li>`).join('')}</ul>`;
                 } else {
                     document.getElementById('vr-paradas-wrap').innerHTML = '<p style="color:var(--gt);font-size:14px">Sin paradas registradas</p>';
                 }
@@ -1723,9 +1790,8 @@
                 let url = `/autobuses?q=${encodeURIComponent(q)}`;
                 if (estado) url += `&estado=${encodeURIComponent(estado)}`;
                 const buses = await api('GET', url);
-                if (!buses.length)
-                {
-                    tbody.innerHTML = ''; 
+                if (!buses.length) {
+                    tbody.innerHTML = '';
                     em.style.display = '';
 
                     if (q) campoBusqueda.classList.add('invalid');       // ← línea nueva
@@ -1734,18 +1800,18 @@
                 campoBusqueda.classList.remove('invalid');               // ← línea nueva
                 em.style.display = 'none';
                 tbody.innerHTML = buses.map(b => `<tr>
-            <td><span style="font-family:var(--m);font-weight:600;color:var(--verde)">${b.placa}</span></td>
-            <td><span style="font-family:var(--m);font-size:13px">${b.codigo}</span></td>
-            <td>${b.marca} ${b.modelo}</td>
-            <td>${b.anio}</td>
-            <td>${b.capacidad} pax</td>
-            <td>${badge(b.estado)}</td>
-            <td><div style="display:flex;gap:6px">
-              <button class="btn bsm bs" onclick="verBus(${b.id})">Ver</button>
-              <button class="btn bsm bp" onclick="editarBus(${b.id})">Modificar</button>
-              <button class="btn bsm bd" onclick="eliminarBus(${b.id},'${b.placa}')">Eliminar</button>
-            </div></td>
-          </tr>`).join('');
+                <td><span style="font-family:var(--m);font-weight:600;color:var(--verde)">${b.placa}</span></td>
+                <td><span style="font-family:var(--m);font-size:13px">${b.codigo}</span></td>
+                <td>${b.marca} ${b.modelo}</td>
+                <td>${b.anio}</td>
+                <td>${b.capacidad} pax</td>
+                <td>${badge(b.estado)}</td>
+                <td><div style="display:flex;gap:6px">
+                  <button class="btn bsm bs" onclick="verBus(${b.id})">Ver</button>
+                  <button class="btn bsm bp" onclick="editarBus(${b.id})">Modificar</button>
+                  <button class="btn bsm bd" onclick="eliminarBus(${b.id},'${b.placa}')">Eliminar</button>
+                </div></td>
+              </tr>`).join('');
             } catch (e) { toast('Error cargando flota', 'er'); }
         }
 
@@ -1776,14 +1842,14 @@
                 if (cond) ok = false;
             };
 
-            // E4: formato placa ABC-123
+            // CA4: formato placa ABC-123
             const regexPlaca = /^[A-Z]{3}-[0-9]{3}$/;
             setInv('f-bus-placa',
                 !placa || !regexPlaca.test(placa),
                 !placa ? 'La placa es obligatoria' : 'Formato inválido — se esperaba: ABC-123'
             );
 
-            // E4: formato código BUS-004
+            // CA4: formato código BUS-004
             const regexCodigo = /^[A-Z]{2,5}-[0-9]{2,5}$/;
             setInv('f-bus-codigo',
                 !codigo || !regexCodigo.test(codigo),
@@ -1880,27 +1946,27 @@
                 const b = await api('GET', `/autobuses/${id}`);
                 busEditId = id;
                 document.getElementById('bus-det').innerHTML = `
-            <dl class="df"><dt>Placa</dt><dd style="font-family:var(--m);color:var(--verde);font-size:18px;font-weight:700">${b.placa}</dd></dl>
-            <dl class="df"><dt>Código</dt><dd style="font-family:var(--m)">${b.codigo}</dd></dl>
-            <dl class="df"><dt>Estado</dt><dd>${badge(b.estado)}</dd></dl>
-            <dl class="df"><dt>Marca</dt><dd>${b.marca}</dd></dl>
-            <dl class="df"><dt>Modelo</dt><dd>${b.modelo}</dd></dl>
-            <dl class="df"><dt>Año</dt><dd>${b.anio}</dd></dl>
-            <dl class="df"><dt>Capacidad</dt><dd>${b.capacidad} pasajeros</dd></dl>
-            <dl class="df"><dt>Registrado</dt><dd>${b.creado_en}</dd></dl>`;
+                <dl class="df"><dt>Placa</dt><dd style="font-family:var(--m);color:var(--verde);font-size:18px;font-weight:700">${b.placa}</dd></dl>
+                <dl class="df"><dt>Código</dt><dd style="font-family:var(--m)">${b.codigo}</dd></dl>
+                <dl class="df"><dt>Estado</dt><dd>${badge(b.estado)}</dd></dl>
+                <dl class="df"><dt>Marca</dt><dd>${b.marca}</dd></dl>
+                <dl class="df"><dt>Modelo</dt><dd>${b.modelo}</dd></dl>
+                <dl class="df"><dt>Año</dt><dd>${b.anio}</dd></dl>
+                <dl class="df"><dt>Capacidad</dt><dd>${b.capacidad} pasajeros</dd></dl>
+                <dl class="df"><dt>Registrado</dt><dd>${b.creado_en}</dd></dl>`;
                 goTo('bus-ver');
             } catch (e) {
 
-                toast('Autobus no encontrado en el sistema', 'er'); 
+                toast('Autobus no encontrado en el sistema', 'er');
 
                 const campoBusqueda = document.getElementById('bus-srch');
-                   if (campoBusqueda) {
-                        campoBusqueda.classList.add('invalid');
-                        campoBusqueda.focus();
-                        campoBusqueda.addEventListener('input', () => {
-                            campoBusqueda.classList.remove('invalid');  // se limpia al escribir
-                        }, { once: true });
-                    }    
+                if (campoBusqueda) {
+                    campoBusqueda.classList.add('invalid');
+                    campoBusqueda.focus();
+                    campoBusqueda.addEventListener('input', () => {
+                        campoBusqueda.classList.remove('invalid');  // se limpia al escribir
+                    }, { once: true });
+                }
             }
         }
 
@@ -1919,22 +1985,35 @@
         // ══════════════════════════════════════════════════════
 
         async function cargarConductores() {
+            const q = document.getElementById('cond-srch')?.value || '';
             const tbody = document.getElementById('tb-conductores');
             const em = document.getElementById('em-conductores');
             try {
-                const conductores = await api('GET', '/conductores');
-                if (!conductores.length) { tbody.innerHTML = ''; em.style.display = ''; return; }
+                const conductores = await api('GET', `/conductores?q=${encodeURIComponent(q)}`);
+                if (!conductores.length) {
+                    tbody.innerHTML = '';
+                    em.style.display = '';
+                    // E7: marcar campo si hay búsqueda activa
+                    const inp = document.getElementById('cond-srch');
+                    if (inp && q) inp.classList.add('invalid');
+                    return;
+                }
+                document.getElementById('cond-srch')?.classList.remove('invalid');
                 em.style.display = 'none';
                 tbody.innerHTML = conductores.map(c => `<tr>
-            <td>${c.nombre}</td>
-            <td style="font-family:var(--m)">${c.cedula}</td>
-            <td style="font-family:var(--m)">${c.username}</td>
-            <td><span class="badge bOk">${c.rol.replace(/_/g, ' ')}</span></td>
-            <td>${c.creado_en}</td>
-            <td><button class="btn bsm bd" onclick="eliminarConductor(${c.id},'${c.nombre.replace(/'/g, "\\'")}')">Eliminar</button></td>
-          </tr>`).join('');
+                <td>${c.nombre}</td>
+                <td style="font-family:var(--m)">${c.cedula}</td>
+                <td style="font-family:var(--m)">${c.username}</td>
+                <td><span class="badge bOk">${c.rol.replace(/_/g, ' ')}</span></td>
+                <td>${c.creado_en}</td>
+                <td><div style="display:flex;gap:6px">
+                  <button class="btn bsm bp" onclick="editarConductor(${c.id})">Modificar</button>
+                  <button class="btn bsm bd" onclick="eliminarConductor(${c.id},'${c.nombre.replace(/'/g, "\\'")}')">Eliminar</button>
+                </div></td>
+              </tr>`).join('');
             } catch (e) { toast('Error cargando conductores', 'er'); }
         }
+
 
         function resetCondForm() {
             ['c-nombre', 'c-cedula', 'c-username', 'c-password'].forEach(id => document.getElementById(id).value = '');
@@ -2078,9 +2157,91 @@
                 document.getElementById('lv').style.display = 'none';
                 document.getElementById('app').classList.add('v');
                 cargarStats();
-                aplicarRol(usuario.rol);   // ← aqui cargamos el nuevo rol 
+                aplicarRol(usuario.rol);   // ← aqui cargamos el nuevo rol
             }
         };
+
+        let condEditId = null;
+
+        // E2: abrir formulario de edición (llamado desde la tabla de conductores)
+        async function editarConductor(id) {
+            try {
+                const c = await api('GET', `/conductores/${id}`);
+                condEditId = id;
+                document.getElementById('ce-nombre').value = c.nombre;
+                document.getElementById('ce-cedula').value = c.cedula;
+                document.getElementById('ce-username').value = c.username;
+                document.getElementById('ce-rol').value = c.rol;
+                document.getElementById('ce-password').value = '';
+                ['f-ce-nombre', 'f-ce-rol', 'f-ce-password'].forEach(fid =>
+                    document.getElementById(fid).classList.remove('invalid')
+                );
+                goTo('cond-editar');
+            } catch (e) {
+                // E7: conductor no encontrado
+                toast('Conductor no encontrado en el sistema', 'er');
+            }
+        }
+
+        // E8: cancelar con modal de confirmación (igual que buses/rutas)
+        function cancelarEdicionConductor() {
+            showCancelModal('¿Seguro que desea descartar los cambios?', () => goTo('conductores'));
+        }
+
+        async function actualizarConductor() {
+            const nombre = document.getElementById('ce-nombre').value.trim();
+            const rol = document.getElementById('ce-rol').value;
+            const password = document.getElementById('ce-password').value;
+
+            let ok = true;
+            const setInv = (fId, cond) => {
+                document.getElementById(fId).classList.toggle('invalid', cond);
+                if (cond) ok = false;
+            };
+
+            const soloNombre = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$/;
+            setInv('f-ce-nombre', !nombre || !soloNombre.test(nombre));
+            setInv('f-ce-rol', !rol);
+            if (!ok) { toast('Corrige los campos marcados antes de guardar', 'er'); return; }
+
+            const btn = document.getElementById('ce-save');
+            btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
+            try {
+                const body = { nombre, rol };
+                if (password) body.password = password;    // solo envía si se llenó
+                const d = await api('PUT', `/conductores/${condEditId}`, body);
+                toast(d.message || 'Datos actualizados correctamente ✓');
+                goTo('conductores');
+            } catch (e) { toast(e.message, 'er'); }
+            btn.disabled = false; btn.textContent = 'Guardar Cambios';
+        }
+
+        // Sanitización igual que en el form de creación
+        function initConductorEditGuards() {
+            const n = document.getElementById('ce-nombre');
+            if (!n) return;
+            n.oninput = function () {
+                const c = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, '');
+                if (this.value !== c) this.value = c;
+            };
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </script>
 </body>
 </html>
