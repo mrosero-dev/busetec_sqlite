@@ -19,15 +19,42 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
 
         const db = await getDb();
-        const rows = query(db, 'SELECT * FROM usuarios WHERE username = ? AND password = ?', [username, password]);
 
-        if (!rows.length)
-            return res.status(401).json({ error: 'Credenciales incorrectas' });
+        // Busca primero en usuarios (gestores, operadores)
+        const usuariosRows = query(db,
+            'SELECT * FROM usuarios WHERE username = ? AND password = ?',
+            [username, password]
+        );
 
-        const u = rows[0];
-        res.json({ ok: true, usuario: { id: u.id, nombre: u.nombre, rol: u.rol, username: u.username } });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        if (usuariosRows.length) {
+            const u = usuariosRows[0];
+            return res.json({
+                ok: true,
+                usuario: { id: u.id, nombre: u.nombre, rol: u.rol, username: u.username }
+            });
+        }
+
+        // Si no, busca en conductores
+        const condRows = query(db,
+            'SELECT * FROM conductores WHERE username = ? AND password = ?',
+            [username, password]
+        );
+
+        if (condRows.length) {
+            const c = condRows[0];
+            return res.json({
+                ok: true,
+                usuario: { id: c.id, nombre: c.nombre, rol: c.rol, username: c.username }
+            });
+        }
+
+        return res.status(401).json({ error: 'Credenciales incorrectas' });
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
+
 
 // ── HU-3: LISTAR / BUSCAR RUTAS ───────────────────────────
 app.get('/api/rutas', async (req, res) => {
@@ -327,7 +354,8 @@ app.post('/api/conductores', async (req, res) => {
             [nombre.trim(), cedula.trim(), username.trim(), password, rol]);
 
         const nuevo = query(db, 'SELECT id, nombre, cedula, username, rol, creado_en FROM conductores WHERE username = ?', [username.trim()])[0];
-        res.status(201).json({ ...nuevo, message: `✓ Rol asignado correctamente al conductor ${nombre}.` });
+        // para que cumpla el mss E1
+        res.status(201).json({ ...nuevo, message: `✓ Conductor ${nombre} registrado correctamente.` });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

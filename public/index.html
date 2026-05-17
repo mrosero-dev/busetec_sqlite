@@ -6,6 +6,90 @@
     <title>Sotracauca — Gestión de Buses</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+
+
+        .sel-wrap {
+            position: relative;
+            min-width: 180px;
+        }
+
+            .sel-wrap select {
+                width: 100%;
+                padding: 10px 14px;
+                border: 1.5px solid var(--g2);
+                border-radius: var(--rs);
+                font-family: var(--f);
+                font-size: 14px;
+                outline: none;
+                background: var(--blanco);
+                transition: border-color var(--tr);
+            }
+
+                .sel-wrap select:focus {
+                    border-color: var(--verde);
+                }
+
+        .sel-search {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+        }
+
+            .sel-search input {
+                width: 100%;
+                padding: 10px 14px;
+                border: 1.5px solid var(--verde);
+                border-radius: var(--rs) var(--rs) 0 0;
+                font-family: var(--f);
+                font-size: 14px;
+                outline: none;
+                background: var(--blanco);
+                box-shadow: 0 0 0 3px rgba(26,107,58,.12);
+            }
+
+        .sel-search-opts {
+            background: var(--blanco);
+            border: 1.5px solid var(--verde);
+            border-top: none;
+            border-radius: 0 0 var(--rs) var(--rs);
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: var(--shl);
+        }
+
+        .sel-search-opt {
+            padding: 10px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--g2);
+            transition: background var(--tr);
+        }
+
+            .sel-search-opt:last-child {
+                border-bottom: none;
+            }
+
+            .sel-search-opt:hover, .sel-search-opt.hl {
+                background: var(--g1);
+            }
+
+            .sel-search-opt.sel-none {
+                color: var(--gt);
+                font-style: italic;
+                cursor: default;
+            }
+
+                .sel-search-opt.sel-none:hover {
+                    background: none;
+                }
+
+
+
+
+
         :root {
             --verde: #1a6b3a;
             --verde-h: #1a5530;
@@ -1047,6 +1131,44 @@
                     Asignar Rol
                 </div>
 
+
+                <!-- ASIGNACIONES: solo gestor_operativo -->
+                <div class="st nav-gestor">Asignaciones</div>
+                <div class="ni nav-gestor" id="n-asignaciones" onclick="goTo('asignaciones',this)">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+                    </svg>
+                    Consultar Asignaciones
+                </div>
+                <div class="ni nav-gestor" id="n-asig-crear" onclick="goTo('asig-crear',this)">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="16" />
+                        <line x1="8" y1="12" x2="16" y2="12" />
+                    </svg>
+                    Nueva Asignación
+                </div>
+
+                <!-- INCIDENCIAS Y SALARIOS: solo gestor_operativo -->
+                <div class="st nav-supervisor">Incidencias</div>
+                <div class="ni nav-supervisor" id="n-incidencias" onclick="goTo('incidencias',this)">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="12" y1="18" x2="12" y2="12" />
+                        <line x1="9" y1="15" x2="15" y2="15" />
+                    </svg>
+                    Registrar Incidencia
+                </div>
+                <div class="st nav-supervisor">Salarios</div>
+                <div class="ni nav-supervisor" id="n-salarios" onclick="goTo('salarios',this)">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <line x1="12" y1="1" x2="12" y2="23" />
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                    Calcular Salarios
+                </div>
+
                 <!-- MODIFICAR RUTA: solo gestor_operativo -->
                 <div class="st nav-gestor">Gestión de Rutas</div>
                 <div class="ni nav-gestor" id="n-lista-gestor" onclick="goTo('lista',this)">
@@ -1355,7 +1477,7 @@
                         </div>
                         <div id="em-conductores" class="es" style="display:none">
                             <div class="ei"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg></div>
-                            <div class="et">Sin conductores registrados</div>
+                            <div class="et">Conductor no encontrado</div>
                             <div class="esub">Aún no se ha asignado ningún rol</div>
                             <button class="btn bp bsm" onclick="goTo('cond-crear')">+ Asignar Rol</button>
                         </div>
@@ -1467,14 +1589,299 @@
 
 
 
+                <!-- ── CONSULTAR ASIGNACIONES ── -->
+                <div class="pv" id="page-asignaciones">
+                    <div class="card">
+                        <div class="ch">
+                            <div class="ct">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+                                </svg>
+                                Consultar Asignaciones
+                            </div>
+                            <button class="btn bp bsm" onclick="goTo('asig-crear')">+ Nueva Asignación</button>
+                        </div>
+                        <!-- Filtros E2/E3/E4 -->
+                        <div class="sb2">
+                            <div class="sel-wrap" id="sw-bus">
+                                <select id="asig-f-bus" onchange="cargarAsignaciones()" onfocus="activarBusqueda('sw-bus','asig-f-bus')">
+                                    <option value="">Todos los autobuses</option>
+                                </select>
+                                <div class="sel-search" id="ss-bus">
+                                    <input type="text" id="ss-bus-inp" placeholder="Buscar autobús..." oninput="filtrarOpts('ss-bus','asig-f-bus')" onkeydown="navOpts(event,'ss-bus','asig-f-bus')" />
+                                    <div class="sel-search-opts" id="ss-bus-opts"></div>
+                                </div>
+                            </div>
+                            <div class="sel-wrap" id="sw-cond">
+                                <select id="asig-f-cond" onchange="cargarAsignaciones()" onfocus="activarBusqueda('sw-cond','asig-f-cond')">
+                                    <option value="">Todos los conductores</option>
+                                </select>
+                                <div class="sel-search" id="ss-cond">
+                                    <input type="text" id="ss-cond-inp" placeholder="Buscar conductor..." oninput="filtrarOpts('ss-cond','asig-f-cond')" onkeydown="navOpts(event,'ss-cond','asig-f-cond')" />
+                                    <div class="sel-search-opts" id="ss-cond-opts"></div>
+                                </div>
+                            </div>
+                            <div class="sel-wrap" id="sw-ruta">
+                                <select id="asig-f-ruta" onchange="cargarAsignaciones()" onfocus="activarBusqueda('sw-ruta','asig-f-ruta')">
+                                    <option value="">Todas las rutas</option>
+                                </select>
+                                <div class="sel-search" id="ss-ruta">
+                                    <input type="text" id="ss-ruta-inp" placeholder="Buscar ruta..." oninput="filtrarOpts('ss-ruta','asig-f-ruta')" onkeydown="navOpts(event,'ss-ruta','asig-f-ruta')" />
+                                    <div class="sel-search-opts" id="ss-ruta-opts"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tw">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Autobús</th>
+                                        <th>Ruta</th>
+                                        <th>Conductor</th>
+                                        <th>Horario</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tb-asignaciones"></tbody>
+                            </table>
+                        </div>
+                        <!-- E5: sin asignaciones -->
+                        <div id="em-asignaciones" class="es" style="display:none">
+                            <div class="ei"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13" /></svg></div>
+                            <div class="et">No hay asignaciones activas actualmente</div>
+                            <div class="esub">Crea una nueva asignación para comenzar</div>
+                            <button class="btn bp bsm" onclick="goTo('asig-crear')">+ Nueva Asignación</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── CREAR ASIGNACIÓN ── -->
+                <div class="pv" id="page-asig-crear">
+                    <div class="card">
+                        <div class="ch">
+                            <div class="ct">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="12" y1="8" x2="12" y2="16" />
+                                    <line x1="8" y1="12" x2="16" y2="12" />
+                                </svg>
+                                Nueva Asignación
+                            </div>
+                        </div>
+                        <div class="fg">
+                            <div class="f" id="f-asig-bus">
+                                <label>Autobús *</label>
+                                <select id="asig-bus">
+                                    <option value="">— Seleccionar autobús —</option>
+                                </select>
+                                <div class="err-msg">Debe seleccionar un autobús</div>
+                            </div>
+                            <div class="f" id="f-asig-ruta">
+                                <label>Ruta *</label>
+                                <select id="asig-ruta">
+                                    <option value="">— Seleccionar ruta —</option>
+                                </select>
+                                <div class="err-msg">Debe seleccionar una ruta activa</div>
+                            </div>
+                            <div class="f" id="f-asig-cond">
+                                <label>Conductor *</label>
+                                <select id="asig-cond">
+                                    <option value="">— Seleccionar conductor —</option>
+                                </select>
+                                <div class="err-msg">Debe seleccionar un conductor</div>
+                            </div>
+                            <div class="f" id="f-asig-horario">
+                                <label>Horario *</label>
+                                <input type="time" id="asig-horario" />
+                                <div class="err-msg">El horario es obligatorio</div>
+                            </div>
+                        </div>
+                        <div class="fa">
+                            <button class="btn bs" onclick="goTo('asignaciones')">Cancelar</button>
+                            <button class="btn bp" id="asig-save" onclick="crearAsignacion()">Crear Asignación</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── MODIFICAR ASIGNACIÓN ── -->
+                <div class="pv" id="page-asig-editar">
+                    <div class="card">
+                        <div class="ch">
+                            <div class="ct">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                                Modificar Asignación
+                            </div>
+                        </div>
+                        <div class="fg">
+                            <div class="f" id="f-ae-bus">
+                                <label>Autobús *</label>
+                                <select id="ae-bus"><option value="">— Seleccionar —</option></select>
+                                <div class="err-msg">Debe seleccionar un autobús</div>
+                            </div>
+                            <div class="f" id="f-ae-ruta">
+                                <label>Ruta *</label>
+                                <select id="ae-ruta"><option value="">— Seleccionar —</option></select>
+                                <div class="err-msg">Debe seleccionar una ruta</div>
+                            </div>
+                            <div class="f" id="f-ae-cond">
+                                <label>Conductor *</label>
+                                <select id="ae-cond"><option value="">— Seleccionar —</option></select>
+                                <div class="err-msg">Debe seleccionar un conductor</div>
+                            </div>
+                            <div class="f" id="f-ae-horario">
+                                <label>Horario *</label>
+                                <input type="time" id="ae-horario" />
+                                <div class="err-msg">El horario es obligatorio</div>
+                            </div>
+                        </div>
+                        <div class="fa">
+                            <!-- E5: cancelar con confirmación -->
+                            <button class="btn bs" onclick="cancelarEdicionAsig()">Cancelar</button>
+                            <button class="btn bp" id="ae-save" onclick="actualizarAsignacion()">Guardar Cambios</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── REGISTRAR INCIDENCIA ── -->
+                <div class="pv" id="page-incidencias">
+                    <div class="card">
+                        <div class="ch">
+                            <div class="ct">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                                Registrar Incidencia
+                            </div>
+                            <!-- tabs -->
+                            <div style="display:flex;gap:4px">
+                                <button class="btn bp bsm" id="tab-inc" onclick="switchIncTab('incidencia')">Incidencia</button>
+                                <button class="btn bs bsm" id="tab-dias" onclick="switchIncTab('dias')">Días trabajados</button>
+                            </div>
+                        </div>
+
+                        <!-- TAB: Incidencia (E2/E3) -->
+                        <div id="tab-inc-form">
+                            <div class="fg">
+                                <div class="f full" id="f-inc-cond">
+                                    <label>Conductor *</label>
+                                    <select id="inc-cond"><option value="">— Seleccionar conductor —</option></select>
+                                    <div class="err-msg">Debe seleccionar un conductor</div>
+                                </div>
+                                <div class="f" id="f-inc-fecha">
+                                    <label>Fecha *</label>
+                                    <input type="date" id="inc-fecha" />
+                                    <div class="err-msg">Fecha inválida, seleccione una fecha válida</div>
+                                </div>
+                                <div class="f" id="f-inc-tipo">
+                                    <label>Tipo *</label>
+                                    <select id="inc-tipo">
+                                        <option value="">— Seleccionar tipo —</option>
+                                        <option value="falta">Falta</option>
+                                        <option value="retardo">Retardo</option>
+                                        <option value="permiso_justificado">Permiso justificado</option>
+                                        <option value="excusa_medica">Excusa médica</option>
+                                    </select>
+                                    <div class="err-msg">Debe seleccionar un tipo de incidencia</div>
+                                </div>
+                                <div class="f" id="f-inc-cantidad">
+                                    <label>Cantidad</label>
+                                    <input type="number" id="inc-cantidad" value="1" min="1" />
+                                </div>
+                                <div class="f full">
+                                    <label>Descripción (opcional)</label>
+                                    <textarea id="inc-desc" placeholder="Observaciones adicionales..."></textarea>
+                                </div>
+                            </div>
+                            <div class="fa">
+                                <button class="btn bs" onclick="resetIncForm()">Limpiar</button>
+                                <button class="btn bp" id="inc-save" onclick="registrarIncidencia()">Registrar Incidencia</button>
+                            </div>
+                        </div>
+
+                        <!-- TAB: Días trabajados (E1/E7) -->
+                        <div id="tab-dias-form" style="display:none">
+                            <div class="fg">
+                                <div class="f full" id="f-dias-cond">
+                                    <label>Conductor *</label>
+                                    <select id="dias-cond"><option value="">— Seleccionar conductor —</option></select>
+                                    <div class="err-msg">Debe seleccionar un conductor</div>
+                                </div>
+                                <div class="f" id="f-dias-desde">
+                                    <label>Fecha inicio *</label>
+                                    <input type="date" id="dias-desde" />
+                                    <div class="err-msg">Fecha inválida</div>
+                                </div>
+                                <div class="f" id="f-dias-hasta">
+                                    <label>Fecha fin *</label>
+                                    <input type="date" id="dias-hasta" />
+                                    <div class="err-msg">Fecha inválida</div>
+                                </div>
+                                <div class="f" id="f-dias-cant">
+                                    <label>Días trabajados *</label>
+                                    <input type="number" id="dias-cant" min="1" placeholder="ej. 5" />
+                                    <div class="err-msg">Ingresa un número mayor a 0</div>
+                                </div>
+                            </div>
+                            <div class="fa">
+                                <button class="btn bs" onclick="resetDiasForm()">Limpiar</button>
+                                <button class="btn bp" id="dias-save" onclick="registrarDias()">Registrar Días</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── CALCULAR SALARIOS ── -->
+                <div class="pv" id="page-salarios">
+                    <div class="card">
+                        <div class="ch">
+                            <div class="ct">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <line x1="12" y1="1" x2="12" y2="23" />
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                                Calcular Salarios
+                            </div>
+                        </div>
+                        <div class="fg">
+                            <div class="f" id="f-sal-cond">
+                                <label>Conductor (vacío = todos)</label>
+                                <select id="sal-cond">
+                                    <option value="">— Todos los conductores —</option>
+                                </select>
+                            </div>
+                            <div class="f" id="f-sal-periodo">
+                                <label>Período *</label>
+                                <select id="sal-periodo">
+                                    <option value="mes">Último mes</option>
+                                    <option value="semana">Última semana</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="fa" style="justify-content:flex-start;border:none;padding-top:0;margin-top:0">
+                            <button class="btn bp" onclick="calcularSalarios()">Calcular</button>
+                            <button class="btn bs" id="btn-sal-historico" onclick="verHistorico()" style="display:none">Ver Histórico</button>
+                        </div>
+                        <div id="sal-resultado" style="margin-top:20px"></div>
+                    </div>
+                </div>
+
+
             </div><!-- .co -->
         </main>
     </div><!-- #app -->
 
     <script>
         const API = '/api';
-        let USER = null, editId = null, busEditId = null;
+        //variables globales:
+        let USER = null, editId = null, busEditId = null, condEditId = null, asigEditId = null;
         let crP = [], edP = [], confirmCb = null, cancelCb = null;
+    
 
         // ── TOAST ──
         function toast(m, t = 'ok') {
@@ -1569,7 +1976,12 @@
             editar: 'Modificar Ruta', ver: 'Detalle de Ruta',
             buses: 'Consultar Flota', 'bus-crear': 'Registrar Autobus',
             'bus-editar': 'Modificar Autobus', 'bus-ver': 'Detalle de Autobus',
-            conductores: 'Conductores', 'cond-crear': 'Asignar Rol'
+            conductores: 'Conductores', 'cond-crear': 'Asignar Rol',
+            asignaciones: 'Consultar Asignaciones',
+            'asig-crear': 'Nueva Asignación',
+            'asig-editar': 'Modificar Asignación',
+            incidencias: 'Registrar Incidencia',
+            salarios: 'Calcular Salarios'
         };
 
         function goTo(pg, el) {
@@ -1586,12 +1998,24 @@
             if (pg === 'cond-crear') { resetCondForm(); initConductorInputGuards(); }
             if (pg === 'cond-editar') initConductorEditGuards();
             if (pg === 'home') cargarStats();
+            if (pg === 'asignaciones') { cargarFiltrosAsig(); cargarAsignaciones(); }
+            if (pg === 'asig-crear') { cargarSelectsAsig(['asig-bus'], ['asig-ruta'], ['asig-cond']); }
+            if (pg === 'incidencias') {
+                cargarSelectConductores(['inc-cond', 'dias-cond']);
+                resetIncForm();
+                resetDiasForm();
+                switchIncTab('incidencia');
+            }
+            if (pg === 'salarios') { cargarSelectConductores(['sal-cond']); document.getElementById('sal-resultado').innerHTML = ''; }
+
+
         }
 
         // ── CONTROL DE ROL ──
         function aplicarRol(rol) {
             const esGestor = rol === 'gestor_operativo';
             const esOperador = rol === 'operador_rutas';
+            const esSupervisor = rol === 'supervisor_operativo';
 
             // Elementos visibles solo para operador_rutas
             document.querySelectorAll('.nav-rutas-crear').forEach(el => {
@@ -1603,6 +2027,11 @@
                 el.style.display = esGestor ? '' : 'none';
             });
 
+            // ── nuevo ──
+            document.querySelectorAll('.nav-supervisor').forEach(el => {
+                el.style.display = esSupervisor ? '' : 'none';
+            });
+            
             const btnModRuta = document.getElementById('btn-modificar-ruta');
             if (btnModRuta) btnModRuta.style.display = esGestor ? 'none' : '';
 
@@ -2111,7 +2540,7 @@
 
             try {
                 const d = await api('POST', '/conductores', { nombre, cedula, username, password, rol });
-                toast(d.message || 'Rol asignado correctamente ✓');
+                toast(d.message || `✓ Conductor ${nombre} registrado correctamente.`);  // ← mensaje E1
                 goTo('conductores');
             } catch (e) {
                 toast(e.message, 'er');
@@ -2138,6 +2567,432 @@
             });
         }
 
+        // ══════════════════════════════════════════════════════════
+        //  ASIGNACIONES
+        // ══════════════════════════════════════════════════════════
+  
+
+        async function cargarSelectsAsig(prefijosBus, prefijosRuta, prefCond) {
+            try {
+                const [buses, rutas, conds] = await Promise.all([
+                    api('GET', '/autobuses'),
+                    api('GET', '/rutas'),
+                    api('GET', '/conductores')
+                ]);
+                prefijosBus.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const val = el.value;
+                    el.innerHTML = '<option value="">— Seleccionar autobús —</option>' +
+                        buses.filter(b => b.estado === 'activo')
+                            .map(b => `<option value="${b.id}">${b.placa} — ${b.marca} ${b.modelo}</option>`).join('');
+                    if (val) el.value = val;
+                });
+                prefijosRuta.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const val = el.value;
+                    el.innerHTML = '<option value="">— Seleccionar ruta —</option>' +
+                        rutas.filter(r => r.estado === 'activo')
+                            .map(r => `<option value="${r.id}">${r.codigo} — ${r.descripcion.slice(0, 40)}</option>`).join('');
+                    if (val) el.value = val;
+                });
+                prefCond.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const val = el.value;
+                    el.innerHTML = '<option value="">— Seleccionar conductor —</option>' +
+                        conds.map(c => `<option value="${c.id}">${c.nombre} (${c.cedula})</option>`).join('');
+                    if (val) el.value = val;
+                });
+            } catch (e) { toast('Error cargando datos', 'er'); }
+        }
+
+        // ── Select con búsqueda ───────────────────────────────────
+        function activarBusqueda(swId, selId) {
+            const ss = document.getElementById('ss-' + swId.replace('sw-', ''));
+            const sel = document.getElementById(selId);
+            // construye opciones desde el select
+            const opts = Array.from(sel.options);
+            const ssOpts = document.getElementById('ss-' + swId.replace('sw-', '') + '-opts');
+            ssOpts.innerHTML = opts.map(o =>
+                `<div class="sel-search-opt" data-val="${o.value}" data-label="${o.text}">${o.text}</div>`
+            ).join('');
+            ssOpts.querySelectorAll('.sel-search-opt').forEach(opt => {
+                opt.onclick = () => elegirOpt(swId, selId, opt.dataset.val, opt.dataset.label);
+            });
+            ss.style.display = 'block';
+            const inp = document.getElementById('ss-' + swId.replace('sw-', '') + '-inp');
+            inp.value = '';
+            inp.focus();
+            sel.blur();
+        }
+
+        function filtrarOpts(ssId, selId) {
+            const q = document.getElementById(ssId + '-inp').value.toLowerCase();
+            const opts = document.getElementById(ssId + '-opts');
+            let vis = 0;
+            opts.querySelectorAll('.sel-search-opt:not(.sel-none)').forEach(o => {
+                const match = o.dataset.label.toLowerCase().includes(q);
+                o.style.display = match ? '' : 'none';
+                if (match) vis++;
+            });
+            let noRes = opts.querySelector('.sel-none');
+            if (!vis) {
+                if (!noRes) { noRes = document.createElement('div'); noRes.className = 'sel-search-opt sel-none'; noRes.textContent = 'Sin resultados'; opts.appendChild(noRes); }
+                noRes.style.display = '';
+            } else if (noRes) { noRes.style.display = 'none'; }
+        }
+
+        function navOpts(e, ssId, selId) {
+            const opts = [...document.getElementById(ssId + '-opts').querySelectorAll('.sel-search-opt:not(.sel-none)')].filter(o => o.style.display !== 'none');
+            const hl = document.getElementById(ssId + '-opts').querySelector('.hl');
+            let idx = opts.indexOf(hl);
+            if (e.key === 'ArrowDown') { e.preventDefault(); if (hl) hl.classList.remove('hl'); opts[Math.min(idx + 1, opts.length - 1)]?.classList.add('hl'); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); if (hl) hl.classList.remove('hl'); opts[Math.max(idx - 1, 0)]?.classList.add('hl'); }
+            else if (e.key === 'Enter') { if (hl) elegirOpt('sw-' + ssId.replace('ss-', ''), selId, hl.dataset.val, hl.dataset.label); }
+            else if (e.key === 'Escape') { cerrarBusqueda(ssId); }
+        }
+
+        function elegirOpt(swId, selId, val, label) {
+            const sel = document.getElementById(selId);
+            sel.value = val;
+            cerrarBusqueda('ss-' + swId.replace('sw-', ''));
+            cargarAsignaciones();
+        }
+
+        function cerrarBusqueda(ssId) {
+            const ss = document.getElementById(ssId);
+            if (ss) ss.style.display = 'none';
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.sel-wrap')) {
+                ['ss-bus', 'ss-cond', 'ss-ruta'].forEach(id => cerrarBusqueda(id));
+            }
+        });
+
+        async function cargarFiltrosAsig() {
+            try {
+                const [buses, rutas, conds] = await Promise.all([
+                    api('GET', '/autobuses'),
+                    api('GET', '/rutas'),
+                    api('GET', '/conductores')
+                ]);
+                const fb = document.getElementById('asig-f-bus');
+                const fr = document.getElementById('asig-f-ruta');
+                const fc = document.getElementById('asig-f-cond');
+                fb.innerHTML = '<option value="">Todos los autobuses</option>' +
+                    buses.map(b => `<option value="${b.id}">${b.placa} — ${b.marca} ${b.modelo}</option>`).join('');
+                fr.innerHTML = '<option value="">Todas las rutas</option>' +
+                    rutas.map(r => `<option value="${r.id}">${r.codigo} — ${r.descripcion.slice(0, 40)}</option>`).join('');
+                fc.innerHTML = '<option value="">Todos los conductores</option>' +
+                    conds.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+            } catch (e) { }
+        }
+
+        async function cargarAsignaciones() {
+            const bus = document.getElementById('asig-f-bus')?.value || '';
+            const cond = document.getElementById('asig-f-cond')?.value || '';
+            const ruta = document.getElementById('asig-f-ruta')?.value || '';
+            const tbody = document.getElementById('tb-asignaciones');
+            const em = document.getElementById('em-asignaciones');
+            try {
+                let url = '/asignaciones?';
+                if (bus) url += `bus=${bus}&`;
+                if (cond) url += `cond=${cond}&`;
+                if (ruta) url += `ruta=${ruta}&`;
+                const data = await api('GET', url);
+                if (!data.length) {
+                    tbody.innerHTML = '';
+                    em.style.display = '';
+                    // ── ASIG_m9: solo si hay filtro activo ──
+                    if (bus || cond || ruta) toast('Asignación no encontrada en el sistema', 'er');
+                    return;
+                }
+                em.style.display = 'none';
+                tbody.innerHTML = data.map(a => `<tr>
+            <td style="font-family:var(--m);font-weight:600;color:var(--verde)">#${a.id}</td>
+            <td>${a.placa} <span style="color:var(--gt);font-size:12px">${a.bus_codigo}</span></td>
+            <td>${a.ruta_codigo} <span style="color:var(--gt);font-size:12px">${(a.ruta_desc || '').slice(0, 30)}</span></td>
+            <td>${a.conductor_nombre}</td>
+            <td style="font-family:var(--m)">${a.horario}</td>
+            <td>${badge(a.estado === 'activa' ? 'activo' : 'inactivo')}</td>
+            <td><div style="display:flex;gap:6px">
+                <button class="btn bsm bp" onclick="editarAsig(${a.id})">Modificar</button>
+                <button class="btn bsm bd" onclick="cancelarAsig(${a.id})">Cancelar</button>
+            </div></td>
+        </tr>`).join('');
+            } catch (e) { toast('Error cargando asignaciones', 'er'); }
+        }
+
+        async function crearAsignacion() {
+            const bus = document.getElementById('asig-bus').value;
+            const ruta = document.getElementById('asig-ruta').value;
+            const cond = document.getElementById('asig-cond').value;
+            const horario = document.getElementById('asig-horario').value;
+
+            let ok = true;
+            const setInv = (id, cond_) => { document.getElementById(id).classList.toggle('invalid', cond_); if (cond_) ok = false; };
+            setInv('f-asig-bus', !bus);
+            setInv('f-asig-ruta', !ruta);
+            setInv('f-asig-cond', !cond);
+            setInv('f-asig-horario', !horario);
+            if (!ok) { toast('Debe seleccionar autobús, ruta, conductor y horario', 'er'); return; }
+
+            const btn = document.getElementById('asig-save');
+            btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
+            try {
+                const d = await api('POST', '/asignaciones', {
+                    autobus_id: bus, ruta_id: ruta, conductor_id: cond, horario
+                });
+                toast(d.message || 'Asignación creada correctamente ✓');
+                goTo('asignaciones');
+            } catch (e) {
+                toast(e.message, 'er');
+                if (e.campo === 'autobus_id') document.getElementById('f-asig-bus').classList.add('invalid');
+                if (e.campo === 'conductor_id') document.getElementById('f-asig-cond').classList.add('invalid');
+                if (e.campo === 'ruta_id') document.getElementById('f-asig-ruta').classList.add('invalid');
+            }
+            btn.disabled = false; btn.textContent = 'Crear Asignación';
+        }
+
+        async function editarAsig(id) {
+            try {
+                const a = await api('GET', `/asignaciones/${id}`);
+                asigEditId = id;
+                await cargarSelectsAsig(['ae-bus'], ['ae-ruta'], ['ae-cond']);
+                document.getElementById('ae-bus').value = a.autobus_id;
+                document.getElementById('ae-ruta').value = a.ruta_id;
+                document.getElementById('ae-cond').value = a.conductor_id;
+                document.getElementById('ae-horario').value = a.horario;
+                ['f-ae-bus', 'f-ae-ruta', 'f-ae-cond', 'f-ae-horario'].forEach(fid =>
+                    document.getElementById(fid).classList.remove('invalid'));
+                goTo('asig-editar');
+            } catch (e) { toast('Asignación no encontrada en el sistema', 'er'); }
+        }
+
+        function cancelarEdicionAsig() {
+            showCancelModal('¿Seguro que desea descartar los cambios?', () => goTo('asignaciones'));
+        }
+
+        async function actualizarAsignacion() {
+            const bus = document.getElementById('ae-bus').value;
+            const ruta = document.getElementById('ae-ruta').value;
+            const cond = document.getElementById('ae-cond').value;
+            const horario = document.getElementById('ae-horario').value;
+
+            let ok = true;
+            const setInv = (id, c) => { document.getElementById(id).classList.toggle('invalid', c); if (c) ok = false; };
+            setInv('f-ae-bus', !bus);
+            setInv('f-ae-ruta', !ruta);
+            setInv('f-ae-cond', !cond);
+            setInv('f-ae-horario', !horario);
+            if (!ok) { toast('Corrige los campos marcados', 'er'); return; }
+
+            const btn = document.getElementById('ae-save');
+            btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
+            try {
+                const d = await api('PUT', `/asignaciones/${asigEditId}`, {
+                    autobus_id: bus, ruta_id: ruta, conductor_id: cond, horario
+                });
+                toast(d.message || 'Asignación modificada correctamente ✓');
+                goTo('asignaciones');
+            } catch (e) { toast(e.message, 'er'); }
+            btn.disabled = false; btn.textContent = 'Guardar Cambios';
+        }
+
+        // E2/E3: cancelar asignación con confirmación
+        function cancelarAsig(id) {
+            confirm_('Cancelar Asignación', '¿Está seguro de cancelar esta asignación?', async () => {
+                try {
+                    const d = await api('PATCH', `/asignaciones/${id}/cancelar`, {});
+                    toast(d.message || 'Asignación cancelada correctamente ✓', 'wn');
+                    cargarAsignaciones();
+                } catch (e) { toast(e.message, 'er'); }
+            });
+        }
+
+        // ══════════════════════════════════════════════════════════
+        //  INCIDENCIAS
+        // ══════════════════════════════════════════════════════════
+
+        function switchIncTab(tab) {
+            const esInc = tab === 'incidencia';
+            document.getElementById('tab-inc-form').style.display = esInc ? '' : 'none';
+            document.getElementById('tab-dias-form').style.display = esInc ? 'none' : '';
+            document.getElementById('tab-inc').className = esInc ? 'btn bp bsm' : 'btn bs bsm';
+            document.getElementById('tab-dias').className = esInc ? 'btn bs bsm' : 'btn bp bsm';
+        }
+
+        function resetDiasForm() {
+            ['dias-cond', 'dias-desde', 'dias-hasta'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('dias-cant').value = '';
+            ['f-dias-cond', 'f-dias-desde', 'f-dias-hasta', 'f-dias-cant'].forEach(id =>
+                document.getElementById(id).classList.remove('invalid'));
+        }
+
+        async function registrarDias() {
+            const cond_id = document.getElementById('dias-cond').value;
+            const desde = document.getElementById('dias-desde').value;
+            const hasta = document.getElementById('dias-hasta').value;
+            const cant = parseInt(document.getElementById('dias-cant').value);
+
+            let ok = true;
+            const setInv = (id, c) => { document.getElementById(id).classList.toggle('invalid', c); if (c) ok = false; };
+
+            // E7: sin conductor
+            setInv('f-dias-cond', !cond_id);
+            if (!cond_id) { toast('Debe seleccionar un conductor', 'er'); return; }
+
+            const hoy = new Date().toISOString().split('T')[0];
+            setInv('f-dias-desde', !desde || desde > hoy);
+            setInv('f-dias-hasta', !hasta || hasta > hoy || hasta < desde);
+            setInv('f-dias-cant', !cant || cant < 1);
+            if (!ok) { toast('Verifica los campos marcados', 'er'); return; }
+
+            const btn = document.getElementById('dias-save');
+            btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
+            try {
+                const d = await api('POST', '/incidencias', {
+                    conductor_id: cond_id,
+                    fecha: hasta,
+                    tipo: 'dias_trabajados',
+                    cantidad: cant,
+                    descripcion: `Período: ${desde} → ${hasta}`
+                });
+                toast('Días trabajados registrados correctamente ✓');  // INC_m1
+                resetDiasForm();
+            } catch (e) {
+                toast(e.message, 'er');
+                if (e.campo === 'conductor_id') document.getElementById('f-dias-cond').classList.add('invalid');
+            }
+            btn.disabled = false; btn.textContent = 'Registrar Días';
+        }
+
+        async function registrarIncidencia() {
+            const cond_id = document.getElementById('inc-cond').value;
+            const fecha = document.getElementById('inc-fecha').value;
+            const tipo = document.getElementById('inc-tipo').value;
+            const cantidad = document.getElementById('inc-cantidad').value;
+            const desc = document.getElementById('inc-desc').value.trim();
+
+            let ok = true;
+            const setInv = (id, c) => { document.getElementById(id).classList.toggle('invalid', c); if (c) ok = false; };
+
+            setInv('f-inc-cond', !cond_id);
+            if (!cond_id) { toast('Debe seleccionar un conductor', 'er'); return; }
+
+            const fechaInv = !fecha || new Date(fecha) > new Date();
+            setInv('f-inc-fecha', fechaInv);
+            if (fechaInv) { toast('Fecha inválida, seleccione una fecha válida', 'er'); return; }
+
+            setInv('f-inc-tipo', !tipo);
+            if (!tipo) { toast('Debe seleccionar un tipo de incidencia', 'er'); return; }
+
+            const btn = document.getElementById('inc-save');
+            btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
+            try {
+                const d = await api('POST', '/incidencias', {
+                    conductor_id: cond_id, fecha, tipo,
+                    cantidad: Number(cantidad), descripcion: desc
+                });
+                toast(d.message || 'Incidencia registrada correctamente ✓');  // INC_m2
+                resetIncForm();
+            } catch (e) {
+                toast(e.message, 'er');
+                if (e.campo === 'conductor_id') document.getElementById('f-inc-cond').classList.add('invalid');
+            }
+            btn.disabled = false; btn.textContent = 'Registrar Incidencia';
+        }
+
+        function resetIncForm() {
+            ['inc-cond', 'inc-fecha', 'inc-tipo'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('inc-cantidad').value = '1';
+            document.getElementById('inc-desc').value = '';
+            ['f-inc-cond', 'f-inc-fecha', 'f-inc-tipo'].forEach(id =>
+                document.getElementById(id).classList.remove('invalid'));
+        }
+
+        // ══════════════════════════════════════════════════════════
+        //  SALARIOS
+        // ══════════════════════════════════════════════════════════
+
+        async function calcularSalarios() {
+            const cond_id = document.getElementById('sal-cond').value;
+            const periodo = document.getElementById('sal-periodo').value;
+            const div = document.getElementById('sal-resultado');
+            div.innerHTML = '<p style="color:var(--gt)">Calculando...</p>';
+
+            try {
+                let url = `/salarios/calcular?periodo=${periodo}`;
+                if (cond_id) url += `&conductor_id=${cond_id}`;
+                const data = await api('GET', url);
+
+                if (!data || !data.length) {
+                    div.innerHTML = '';
+                    toast('No hay datos registrados en el período seleccionado', 'wn'); // SAL_m3
+                    return;
+                }
+
+                document.getElementById('btn-sal-historico').style.display = cond_id ? '' : 'none';
+
+                div.innerHTML = `
+                        <div class="tw"><table>
+                            <thead><tr>
+                                <th>Conductor</th><th>Días trabajados</th>
+                                <th>Faltas</th><th>Retardos</th>
+                                <th>Salario bruto</th><th>Descuentos</th><th>Salario neto</th>
+                            </tr></thead>
+                            <tbody>${data.map(d => `<tr>
+                                <td>${d.nombre}</td>
+                                <td>${d.dias_trabajados}</td>
+                                <td>${d.faltas}</td>
+                                <td>${d.retardos}</td>
+                                <td>$${d.salario_bruto.toLocaleString()}</td>
+                                <td style="color:var(--rojo)">-$${d.descuentos.toLocaleString()}</td>
+                                <td><strong>$${d.salario_neto.toLocaleString()}</strong></td>
+                            </tr>`).join('')}</tbody>
+                        </table></div>
+                        <p style="font-size:12px;color:var(--gt);margin-top:8px">
+                            Período: ${data[0].desde} → ${data[0].hasta}
+                        </p>`;
+            } catch (e) {
+                div.innerHTML = '';
+                // SAL_m1: sin días trabajados / SAL_m2: conductor no existe
+                if (e.message?.includes('no tiene registro')) {
+                    toast('El conductor no tiene registro de días trabajados en el período seleccionado', 'wn'); // SAL_m1
+                } else if (e.message?.includes('no encontrado')) {
+                    toast('Conductor no encontrado', 'er'); // SAL_m2
+                } else {
+                    toast(e.message || 'No hay datos registrados en el período seleccionado', 'wn'); // SAL_m3
+                }
+            }
+        }
+
+
+        async function verHistorico() {
+            const cond_id = document.getElementById('sal-cond').value;
+            if (!cond_id) return;
+            const div = document.getElementById('sal-resultado');
+            try {
+                const data = await api('GET', `/salarios/historico/${cond_id}`);
+                if (!data.historico.length) {
+                    div.innerHTML = '<p style="color:var(--gt)">Sin historial registrado.</p>'; return;
+                }
+                div.innerHTML = `<p style="font-weight:600;margin-bottom:12px">Histórico — ${data.conductor.nombre}</p>
+        <div class="tw"><table>
+            <thead><tr><th>Mes</th><th>Días</th><th>Faltas</th><th>Retardos</th></tr></thead>
+            <tbody>${data.historico.map(h => `<tr>
+                <td style="font-family:var(--m)">${h.mes}</td>
+                <td>${h.dias}</td><td>${h.faltas}</td><td>${h.retardos}</td>
+            </tr>`).join('')}</tbody>
+        </table></div>`;
+            } catch (e) { toast(e.message, 'er'); }
+        }
+
+
+
         // ── INIT ──
         document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeM(); closeCancelModal(); } });
         document.getElementById('lu').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('lp').focus(); });
@@ -2161,7 +3016,7 @@
             }
         };
 
-        let condEditId = null;
+  
 
         // E2: abrir formulario de edición (llamado desde la tabla de conductores)
         async function editarConductor(id) {
@@ -2225,21 +3080,6 @@
                 if (this.value !== c) this.value = c;
             };
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     </script>
